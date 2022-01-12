@@ -41,10 +41,18 @@ app.get('/', (req, res) => {
 
 app.get('/users', (req, res) => {
 	const name = req.query.name;
+	const job = req.query.job;
 	if (name != undefined){
-		let result = findUserByName(name);
-		result = {users_list: result};
-		res.send(result);
+		if (job != undefined){
+			let result = findUserByNameJob(name, job);
+			result = {users_list: result};
+			res.send(result);
+		}
+		else {
+			let result = findUserByName(name);
+			result = {users_list: result};
+			res.send(result);
+		}
 	}
 	else {
 		res.send(users);
@@ -68,16 +76,32 @@ app.post('/users', (req, res) => {
 	res.status(200).end();
 });
 
+app.delete('/users/:id', (req, res) => {
+	const id = req.params['id'];
+	let result = findUserById(id);
+	if (result === undefined || result.length == 0)
+		res.status(404).send('Resource not found. ');
+	else {
+		deleteUser(result);
+		res.status(200);
+	}
+});
+
+function deleteUser(user) {
+	users['users_list'].pop(user);
+}
+
 function addUser(user) {
 	users['users_list'].push(user);
 }
-
 
 function findUserById(id) {
 	return users['users_list'].find( (user) => user['id'] === id);
 }
 
-
+function findUserByNameJob(name, job) {
+	return users['users_list'].find( ((user) => user['name'] === name) && ((user) => user['job'] === job))
+}
 
 const findUserByName = (name) => {
 	return users['users_list'].filter( (user) => user['name'] === name);
