@@ -34,7 +34,7 @@ const users = {
 	]
 }
 
-app.use(cors())
+app.use(cors());
 
 app.use(express.json());
 
@@ -75,8 +75,14 @@ app.get('/users/:id', (req, res) => {
 
 app.post('/users', (req, res) => {
 	const userToAdd = req.body;
-	addUser(userToAdd);
-	res.status(200).end();
+	try {
+		userAdded = addUser(userToAdd);
+		res.status(201).end();
+		res.send(userAdded);
+	}
+	catch {
+		res.status(200).end();
+	}
 });
 
 app.delete('/users/:id', (req, res) => {
@@ -86,7 +92,8 @@ app.delete('/users/:id', (req, res) => {
 		res.status(404).send('Resource not found. ');
 	else {
 		deleteUser(result);
-		res.status(200);
+		res.status(204).end();
+		res.send(users);
 	}
 });
 
@@ -95,7 +102,12 @@ function deleteUser(user) {
 }
 
 function addUser(user) {
+	if (user['id'] === undefined) {
+		new_id = Math.floor((1+Math.random()) * 0x1000).toString(16);
+		user['id'] = new_id;
+	}
 	users['users_list'].push(user);
+	return user
 }
 
 function findUserById(id) {
