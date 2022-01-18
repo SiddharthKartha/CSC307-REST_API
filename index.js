@@ -77,11 +77,12 @@ app.post('/users', (req, res) => {
 	const userToAdd = req.body;
 	try {
 		userAdded = addUser(userToAdd);
-		res.status(201).end();
-		res.send(userAdded);
+		res.status(201).send(userAdded).end();
+		//res.send(userAdded);
+		
 	}
 	catch {
-		res.status(200).end();
+		res.status(404).end();
 	}
 });
 
@@ -92,22 +93,26 @@ app.delete('/users/:id', (req, res) => {
 		res.status(404).send('Resource not found. ');
 	else {
 		deleteUser(result);
-		res.status(204).end();
-		res.send(users);
+		res.status(204);
+		res.send(users).end();
 	}
 });
 
 function deleteUser(user) {
-	users['users_list'].pop(user);
+	users['users_list'].shift(user);
+	console.log(user);
 }
 
 function addUser(user) {
 	if (user['id'] === undefined) {
-		new_id = Math.floor((1+Math.random()) * 0x1000).toString(16);
+		new_id = Math.floor((1+Math.random()) * 0x100000).toString(16);
+		while (findUserById(new_id) !== undefined) {
+			new_id = Math.floor((1+Math.random()) * 0x100000).toString(16);
+		}
 		user['id'] = new_id;
 	}
 	users['users_list'].push(user);
-	return user
+	return user;
 }
 
 function findUserById(id) {
